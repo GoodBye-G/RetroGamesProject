@@ -30,7 +30,13 @@ window.ARCADE_GAMES = [
   {
     initials: 'ША',
     games: [
-      { id: 'sha-game1', title: 'Игра 1', about: 'В разработке', ready: false },
+      {
+        id: 'sha-doom',
+        title: 'DOOM',
+        about: 'Легендарный шутер от первого лица',
+        path: 'sha/doom/',
+        ready: true
+      },
       { id: 'sha-game2', title: 'Игра 2', about: 'В разработке', ready: false }
     ]
   }
