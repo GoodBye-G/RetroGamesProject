@@ -61,9 +61,33 @@ html, body {
   text-shadow: 2px 2px 0 #000;
   pointer-events: none;
   white-space: nowrap;
+  z-index: 4;          /* кнопки ♪ и II доступны и поверх экранов */
 }
-#hud-lives { color: #ff6b6b; }
+/* HP и монетки — в заметных плашках */
+#hud-lives, #hud-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 7px;
+  font-size: 16px;
+  line-height: 20px;
+  background: rgba(10, 6, 12, .7);
+  border: 2px solid currentColor;
+  border-radius: 5px;
+}
+#hud-lives { color: #ff5a5a; }
 #hud-coins { color: #ffd34d; }
+#hud-lives .hp-label { color: #f4e9d4; font-size: 13px; margin-right: 3px; }
+#hud-lives .hp-full { color: #ff4040; }
+#hud-lives .hp-empty { color: #5a3a40; }
+#hud-lives .hp-num { color: #f4e9d4; font-size: 13px; margin-left: 4px; }
+#hud-lives.hp-flash { animation: hpflash .5s ease-out; transform-origin: left center; }
+@keyframes hpflash { 0% { transform: scale(1.25); background: #ff4040; } 100% { transform: scale(1); } }
+/* на узком экране название уровня не влезает — оно есть на паузе и в заставке уровня */
+@media (max-width: 440px) {
+  #hud-level { display: none; }
+  #hud { gap: 6px; padding: 5px 6px; }
+}
 #hud-score { flex: 1; text-align: right; }
 #hud-level { color: #b8e07a; }
 #hud button {
@@ -80,6 +104,34 @@ html, body {
   cursor: pointer;
 }
 #hud button.off { opacity: .45; text-decoration: line-through; }
+#hud button.active { background: #ffd34d; color: #2a1d2e; }
+
+/* ---------- Панель громкости ---------- */
+#volume {
+  position: absolute;
+  top: 38px; right: 8px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  background: #2a1d2e;
+  border: 2px solid #f4e9d4;
+  box-shadow: 3px 3px 0 #000;
+  touch-action: none;
+}
+#volume.hidden { display: none; }
+#volume label { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+#volume input[type=range] {
+  width: 130px;
+  height: 24px;
+  margin: 0;
+  accent-color: #ffd34d;
+  cursor: pointer;
+  touch-action: none;
+}
 
 /* ---------- Экраны ---------- */
 .overlay {
@@ -129,6 +181,29 @@ html, body {
   cursor: pointer;
 }
 .panel button.secondary { background: #f4e9d4; }
+
+/* Кнопки читов и выбора уровня на паузе */
+.panel { max-height: calc(100% - 8px); overflow-y: auto; }
+#cheat { margin-top: 10px; }
+#cheat.hidden { display: none; }
+.cheat-title { margin: 6px 0 3px; font-size: 12px; font-weight: bold; color: #b8a8c0; text-align: left; }
+.cheat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+#level-buttons { grid-template-columns: 1fr 1fr; }
+.panel .cheat-grid button {
+  margin: 0;
+  padding: 5px 2px;
+  font-size: 11px;
+  line-height: 1.15;
+  background: #4a3a52;
+  color: #f4e9d4;
+  box-shadow: 2px 2px 0 #000;
+}
+.panel .cheat-grid button.on { background: #b8e07a; color: #1a1a10; }
+.panel .cheat-grid button.danger { background: #6a0a14; color: #ffb0b0; border-color: #ff3040; }
+.panel .cheat-grid button.current { outline: 2px solid #ffd34d; }
+#cheat-msg { min-height: 16px; margin-top: 6px; font-size: 12px; font-weight: bold; }
+#cheat-msg.ok { color: #b8e07a; }
+#cheat-msg.bad { color: #ff6b6b; }
 .panel button:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
 
 .banner {
@@ -186,4 +261,17 @@ body.touch #pad { display: flex; }
   }
   body.touch .pad-btn { pointer-events: auto; background: rgba(0, 0, 0, .25); width: 64px; height: 64px; }
   body.touch .pad-jump { width: 92px; }
+}
+
+/* После кошмара на названии игры трещина */
+.panel h1.cracked { position: relative; }
+.panel h1.cracked::after {
+  content: '';
+  position: absolute;
+  left: 18%; right: 22%; top: 48%;
+  height: 3px;
+  background: linear-gradient(100deg, transparent 0 8%, #120c14 8% 22%, transparent 22% 30%, #120c14 30% 48%,
+              transparent 48% 55%, #120c14 55% 74%, transparent 74% 80%, #120c14 80% 96%, transparent 96%);
+  transform: rotate(-4deg);
+  box-shadow: 0 1px 0 #a01018;
 }

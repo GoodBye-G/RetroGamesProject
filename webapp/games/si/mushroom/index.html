@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Месть грибов</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=38">
 </head>
 <body>
   <div id="app">
@@ -14,12 +14,18 @@
 
         <!-- Верхняя панель: жизни, монетки, счёт, уровень, кнопки -->
         <div id="hud">
-          <span id="hud-lives">♥3</span>
-          <span id="hud-coins">◎0</span>
+          <span id="hud-lives">HP ♥♥♥♡♡</span>
+          <span id="hud-coins">◎ 0</span>
           <span id="hud-score">0</span>
           <span id="hud-level">1</span>
-          <button id="btn-sound" type="button" aria-label="Звук">♪</button>
+          <button id="btn-sound" type="button" aria-label="Громкость">♪</button>
           <button id="btn-pause" type="button" aria-label="Пауза">II</button>
+        </div>
+
+        <!-- Громкость: открывается кнопкой ♪ -->
+        <div id="volume" class="hidden">
+          <label>Музыка <input id="vol-music" type="range" min="0" max="100" step="1"></label>
+          <label>Звуки <input id="vol-sfx" type="range" min="0" max="100" step="1"></label>
         </div>
 
         <!-- Экраны поверх игры -->
@@ -28,6 +34,13 @@
             <h1 id="ov-title">МЕСТЬ ГРИБОВ</h1>
             <p id="ov-text"></p>
             <div id="ov-buttons"></div>
+            <div id="cheat" class="hidden">
+              <div class="cheat-title">Уровень</div>
+              <div id="level-buttons" class="cheat-grid"></div>
+              <div class="cheat-title">Читы</div>
+              <div id="cheat-buttons" class="cheat-grid"></div>
+              <div id="cheat-msg"></div>
+            </div>
           </div>
         </div>
 
@@ -47,7 +60,7 @@
     </div>
   </div>
 
-  <script src="./levels.js"></script>
-  <script src="./game.js"></script>
+  <script src="./levels.js?v=38"></script>
+  <script src="./game.js?v=38"></script>
 </body>
 </html>
