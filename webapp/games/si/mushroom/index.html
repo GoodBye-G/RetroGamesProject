@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Месть грибов</title>
+  <link rel="stylesheet" href="./style.css?v=38">
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <div id="screen">
+        <canvas id="game" width="240" height="208"></canvas>
+
+        <!-- Верхняя панель: жизни, монетки, счёт, уровень, кнопки -->
+        <div id="hud">
+          <span id="hud-lives">HP ♥♥♥♡♡</span>
+          <span id="hud-coins">◎ 0</span>
+          <span id="hud-score">0</span>
+          <span id="hud-level">1</span>
+          <button id="btn-sound" type="button" aria-label="Громкость">♪</button>
+          <button id="btn-pause" type="button" aria-label="Пауза">II</button>
+        </div>
+
+        <!-- Громкость: открывается кнопкой ♪ -->
+        <div id="volume" class="hidden">
+          <label>Музыка <input id="vol-music" type="range" min="0" max="100" step="1"></label>
+          <label>Звуки <input id="vol-sfx" type="range" min="0" max="100" step="1"></label>
+        </div>
+
+        <!-- Экраны поверх игры -->
+        <div id="overlay" class="overlay">
+          <div class="panel">
+            <h1 id="ov-title">МЕСТЬ ГРИБОВ</h1>
+            <p id="ov-text"></p>
+            <div id="ov-buttons"></div>
+            <div id="cheat" class="hidden">
+              <div class="cheat-title">Уровень</div>
+              <div id="level-buttons" class="cheat-grid"></div>
+              <div class="cheat-title">Читы</div>
+              <div id="cheat-buttons" class="cheat-grid"></div>
+              <div id="cheat-msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="banner" class="banner hidden"></div>
+      </div>
+    </div>
+
+    <!-- Экранные кнопки для телефона -->
+    <div id="pad">
+      <div class="pad-left">
+        <button class="pad-btn" data-key="left" type="button" aria-label="Влево">◀</button>
+        <button class="pad-btn" data-key="right" type="button" aria-label="Вправо">▶</button>
+      </div>
+      <div class="pad-right">
+        <button class="pad-btn pad-jump" data-key="jump" type="button" aria-label="Прыжок">ПРЫЖОК</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./levels.js?v=38"></script>
+  <script src="./game.js?v=38"></script>
+</body>
+</html>
