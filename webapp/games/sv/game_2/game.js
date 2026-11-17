@@ -6,7 +6,7 @@
   'use strict';
 
   // Уникальный id игры — Участник 1 укажет его же в меню (webapp/index.html)
-  var GAME_ID = 'dev2-game1';
+  var GAME_ID = 'sv-game2';
 
   var canvas = document.getElementById('game');
   var ctx = canvas.getContext('2d');

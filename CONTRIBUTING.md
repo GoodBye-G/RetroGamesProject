@@ -8,18 +8,18 @@
 | Ветка | Кто | Что |
 |---|---|---|
 | `feature/bot` | Участник 1 | C++ бот в `bot_cpp/` |
-| `feature/dev1-<игра>` | Участник 1 | игры в `webapp/games/dev1_games/` |
-| `feature/dev2-<игра>` | Участник 2 | игры в `webapp/games/dev2_games/` |
-| `feature/dev3-<игра>` | Участник 3 | игра в `webapp/games/dev3_game/` |
+| `feature/si-<игра>` | Участник 1 (СИ) | игры в `webapp/games/si/` |
+| `feature/sv-<игра>` | Участник 2 (СВ) | игры в `webapp/games/sv/` |
+| `feature/sha-<игра>` | Участник 3 (ША) | игры в `webapp/games/sha/` |
 | `feature/theme` | Участник 3 | `webapp/css/theme.css`, `webapp/assets/` |
 | `feature/presentation` | Участник 3 | `presentation/` |
 
 ```bash
 git checkout main
 git pull
-git checkout -b feature/dev2-pong
+git checkout -b feature/sv-pong
 # ...работа, коммиты...
-git push -u origin feature/dev2-pong
+git push -u origin feature/sv-pong
 # затем Pull Request в main на GitHub
 ```
 
@@ -36,7 +36,7 @@ git push -u origin feature/dev2-pong
 * в `<head>`: `<script src="https://telegram.org/js/telegram-web-app.js"></script>`;
 * общая тема: `<link rel="stylesheet" href="../../../css/theme.css">`;
 * общий хелпер: `<script src="../../../js/arcade.js"></script>` — он сам разворачивает приложение на весь экран (`Telegram.WebApp.expand()`), включает кнопку «Назад» Telegram и запрещает закрытие свайпом вниз;
-* кнопка возврата: `<a href="../../../index.html" class="back-btn">← В меню</a>` (три уровня вверх — игра лежит в `webapp/games/devX/игра/`);
+* кнопка возврата: `<a href="../../../index.html" class="back-btn">← В меню</a>` (три уровня вверх — игра лежит в `webapp/games/<инициалы>/game_N/`);
 * экранные кнопки управления для телефона (блок `.touch-controls`);
 * игра помещается в экран телефона без горизонтальной прокрутки.
 

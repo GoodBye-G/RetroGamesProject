@@ -1,6 +1,6 @@
 # 🕹️ Retro Arcade — Telegram Mini App
 
-Ретро-аркада из 5 браузерных игр, которая открывается внутри Telegram через Web App.
+Ретро-аркада из 6 браузерных игр (по 2 от каждого участника), которая открывается внутри Telegram через Web App.
 Бот написан на C++, веб-часть — чистые HTML5 / CSS / JS, хостинг — GitHub Pages.
 
 Полный план — [PROJECT_PLAN.md](PROJECT_PLAN.md). Правила работы с ветками и папками — [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -10,15 +10,15 @@
 ```text
 bot_cpp/                     Telegram-бот на C++ (Участник 1, ветка feature/bot)
 webapp/
-  index.html                 Главное меню на 5 игр (меняет только Участник 1)
+  index.html                 Главное меню на 6 игр (меняет только Участник 1)
   css/theme.css              Общая ретро-тема (Участник 3)
   js/arcade.js               Общий хелпер: Telegram, кнопка «Назад», рекорды
   assets/                    Общие шрифты и звуки (Участник 3)
   games/
     _template/               Шаблон пустой игры — копируйте отсюда
-    dev1_games/game_1, game_2   Участник 1
-    dev2_games/game_1, game_2   Участник 2
-    dev3_game/game_1            Участник 3
+    si/game_1, game_2           Участник 1 — СИ
+    sv/game_1, game_2           Участник 2 — СВ
+    sha/game_1, game_2          Участник 3 — ША
 presentation/                Презентация к защите (Участник 3)
 ```
 
