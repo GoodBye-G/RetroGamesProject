@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ретро-аркада</title>
+  <script src="https://telegram.org/js/telegram-web-app.js?59"></script>
+  <link rel="stylesheet" href="./app/base.css">
+  <style>
+    body {
+      min-height: 100dvh;
+      padding: calc(20px + var(--safe-top)) 16px calc(28px + var(--safe-bottom));
+    }
+
+    .wrap { max-width: 880px; margin: 0 auto; }
+
+    .head { margin: 4px 0 28px; }
+    .head h1 {
+      margin: 0 0 10px;
+      font-family: var(--font-pixel);
+      font-size: 20px;
+      line-height: 1.4;
+      letter-spacing: .02em;
+    }
+    .head p { margin: 0; color: var(--muted); font-size: 15px; }
+
+    .group { margin-bottom: 26px; }
+    .group-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 0 2px 12px;
+    }
+    .group-head h2 {
+      margin: 0;
+      font-family: var(--font-pixel);
+      font-size: 15px;
+      color: var(--accent);
+    }
+    .group-head span { color: var(--muted); font-size: 13px; }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      min-height: 76px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      color: inherit;
+      text-align: left;
+      text-decoration: none;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+    a.card:hover { border-color: var(--muted); }
+    a.card:active { transform: translateY(1px); }
+
+    .icon {
+      flex: none;
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background-color: var(--surface-2);
+      background-repeat: no-repeat;
+      image-rendering: pixelated;
+    }
+
+    .info { flex: 1; min-width: 0; }
+    .info b { display: block; font-size: 16px; font-weight: 600; margin-bottom: 3px; }
+    .info small { display: block; color: var(--muted); font-size: 13px; line-height: 1.35; }
+
+    .go { flex: none; width: 18px; height: 18px; color: var(--muted); }
+
+    .card.soon { box-shadow: none; background: transparent; border-style: dashed; cursor: default; }
+    .card.soon .icon {
+      background-image: repeating-linear-gradient(45deg, var(--line) 0 2px, transparent 2px 8px);
+    }
+    .card.soon b { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="head">
+      <h1>Ретро-аркада</h1>
+      <p id="summary"></p>
+    </header>
+    <div id="groups"></div>
+  </main>
+
+  <script src="./app/theme.js"></script>
+  <script src="./app/games.js"></script>
+  <script>
+    (function () {
+      var root = document.getElementById('groups');
+      var total = 0, ready = 0;
+      var arrow = '<svg class="go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+                  'stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>';
+
+      function plural(n) {
+        var m10 = n % 10, m100 = n % 100;
+        if (m10 === 1 && m100 !== 11) return 'игра';
+        if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 'игры';
+        return 'игр';
+      }
+
+      ARCADE_GAMES.forEach(function (group) {
+        var section = document.createElement('section');
+        section.className = 'group';
+
+        var head = document.createElement('div');
+        head.className = 'group-head';
+        var h2 = document.createElement('h2');
+        h2.textContent = group.initials;
+        var count = document.createElement('span');
+        var groupReady = group.games.filter(function (g) { return g.ready; }).length;
+        count.textContent = groupReady ? groupReady + ' из ' + group.games.length + ' готово' : 'скоро';
+        head.append(h2, count);
+
+        var list = document.createElement('ul');
+        list.className = 'cards';
+
+        group.games.forEach(function (game) {
+          total++;
+          if (game.ready) ready++;
+
+          var li = document.createElement('li');
+          var card = document.createElement(game.ready ? 'a' : 'div');
+          card.className = 'card' + (game.ready ? '' : ' soon');
+          if (game.ready) card.href = 'play.html?game=' + encodeURIComponent(game.id);
+
+          var icon = document.createElement('span');
+          icon.className = 'icon';
+          if (game.icon) {
+            // Первый кадр спрайт-листа, растянутый на всю иконку
+            icon.style.backgroundImage = 'url("' + game.icon.src + '")';
+            icon.style.backgroundSize = (game.icon.frames * 100) + '% 100%';
+            icon.style.backgroundPosition = '0 0';
+          }
+
+          var info = document.createElement('span');
+          info.className = 'info';
+          var title = document.createElement('b');
+          title.textContent = game.title;
+          var about = document.createElement('small');
+          about.textContent = game.about;
+          info.append(title, about);
+
+          card.append(icon, info);
+          if (game.ready) card.insertAdjacentHTML('beforeend', arrow);
+          li.appendChild(card);
+          list.appendChild(li);
+        });
+
+        section.append(head, list);
+        root.appendChild(section);
+      });
+
+      document.getElementById('summary').textContent =
+        total + ' ' + plural(total) + ' от трёх авторов · готово: ' + ready;
+    })();
+  </script>
+</body>
+</html>

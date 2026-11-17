@@ -1,0 +1,68 @@
+/* Общие цвета и шрифты меню и плеера. Тёплая «бумажная» палитра, тёмная тема — графит. */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Golos+Text:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #f2ede3;
+  --surface: #fffbf3;
+  --surface-2: #ebe4d6;
+  --line: #ddd3c1;
+  --ink: #1f2427;
+  --muted: #6d7069;
+  --accent: #d4482c;
+  --accent-ink: #ffffff;
+  --shadow: 0 1px 0 rgba(31, 36, 39, .06), 0 6px 18px rgba(31, 36, 39, .06);
+  --radius: 14px;
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-text: 'Golos Text', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --safe-top: max(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px), env(safe-area-inset-top));
+  --safe-bottom: max(var(--tg-safe-area-inset-bottom, 0px) + var(--tg-content-safe-area-inset-bottom, 0px), env(safe-area-inset-bottom));
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #1c1d1b;
+  --surface: #262724;
+  --surface-2: #30312d;
+  --line: #3a3b36;
+  --ink: #efe9dd;
+  --muted: #a19d92;
+  --accent: #ef6a48;
+  --accent-ink: #1c1d1b;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-text);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+button { font: inherit; color: inherit; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+.btn:hover { border-color: var(--muted); }
+.btn:active { transform: translateY(1px); }
+.btn svg { width: 16px; height: 16px; flex: none; }
