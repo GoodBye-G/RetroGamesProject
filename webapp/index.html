@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Retro Arcade</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <link rel="stylesheet" href="./css/theme.css">
+  <style>
+    .menu-header { text-align: center; margin: 8px 0 24px; }
+    .menu-header h1 { font-size: 20px; margin-bottom: 8px; }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 0;
+      list-style: none;
+    }
+
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+      padding: 16px;
+      background: var(--panel);
+      border: 2px solid var(--panel-border);
+      box-shadow: var(--pixel) var(--pixel) 0 #000;
+      color: var(--text);
+      text-decoration: none;
+      touch-action: manipulation;
+    }
+
+    .game-card:active { transform: translate(var(--pixel), var(--pixel)); box-shadow: none; }
+    .game-card .icon { font-size: 32px; line-height: 1; }
+    .game-card h2 { font-size: 11px; margin: 0; color: var(--accent); }
+    .game-card .author { font-size: 12px; color: var(--text-dim); margin-top: auto; }
+    .game-card .best { font-family: var(--font-pixel); font-size: 9px; color: var(--accent-2); }
+
+    .game-card.soon { opacity: 0.55; }
+    .game-card.soon .best { color: var(--text-dim); }
+  </style>
+</head>
+<body>
+  <header class="menu-header">
+    <h1>RETRO ARCADE</h1>
+    <p class="muted">Выбери игру</p>
+  </header>
+
+  <ul class="games" id="games"></ul>
+
+  <script src="./js/arcade.js"></script>
+  <script>
+    /*
+      Список игр. Меняет только Участник 1.
+      Готова игра — поменяйте title/icon, путь (если папку переименовали) и ready: true.
+      id совпадает с тем, что игра передаёт в Arcade.saveBest(id, ...).
+    */
+    var GAMES = [
+      { id: 'dev1-game1', title: 'Игра 1', icon: '👾', author: 'Участник 1', path: 'games/dev1_games/game_1/', ready: false },
+      { id: 'dev1-game2', title: 'Игра 2', icon: '🕹️', author: 'Участник 1', path: 'games/dev1_games/game_2/', ready: false },
+      { id: 'dev2-game1', title: 'Игра 3', icon: '🎯', author: 'Участник 2', path: 'games/dev2_games/game_1/', ready: false },
+      { id: 'dev2-game2', title: 'Игра 4', icon: '🧱', author: 'Участник 2', path: 'games/dev2_games/game_2/', ready: false },
+      { id: 'dev3-game1', title: 'Игра 5', icon: '🚀', author: 'Участник 3', path: 'games/dev3_game/game_1/',  ready: false }
+    ];
+
+    var list = document.getElementById('games');
+    GAMES.forEach(function (g) {
+      var li = document.createElement('li');
+      var a = document.createElement('a');
+      a.className = 'game-card' + (g.ready ? '' : ' soon');
+      a.href = g.path + 'index.html';
+
+      var icon = document.createElement('span');
+      icon.className = 'icon';
+      icon.textContent = g.icon;
+
+      var title = document.createElement('h2');
+      title.textContent = g.title;
+
+      var best = document.createElement('span');
+      best.className = 'best';
+      best.textContent = g.ready ? 'РЕКОРД: ' + Arcade.getBest(g.id) : 'СКОРО';
+
+      var author = document.createElement('span');
+      author.className = 'author';
+      author.textContent = g.author;
+
+      a.append(icon, title, best, author);
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+  </script>
+</body>
+</html>

@@ -66,3 +66,31 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# ===== Retro Arcade =====
+# Секреты — токен бота никогда не коммитим
+.env
+*.env
+bot_cpp/config.local.*
+
+# Сборка C++
+bot_cpp/build/
+bot_cpp/out/
+bot_cpp/cmake-build-*/
+*.exe
+*.obj
+*.o
+*.pdb
+*.ilk
+
+# IDE и системное
+.vs/
+.vscode/
+.idea/
+.claude/
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Временные файлы PowerPoint
+presentation/~$*
