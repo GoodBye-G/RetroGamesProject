@@ -99,13 +99,21 @@ void handleUpdate(Telegram& tg, const json& update, const std::string& baseUrl) 
 
 }  // namespace
 
-int main() {
+int main(int argc, char** argv) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
 
     const std::string token = env("BOT_TOKEN");
     std::string baseUrl = env("WEBAPP_URL");
+
+    // --dry-run: напечатать клавиатуру и выйти, без токена и без сети
+    if (argc > 1 && std::string(argv[1]) == "--dry-run") {
+        if (baseUrl.empty()) baseUrl = "https://example.github.io/RetroGamesProject/";
+        if (baseUrl.back() != '/') baseUrl += '/';
+        std::cout << buildKeyboard(baseUrl).dump(2) << "\n";
+        return 0;
+    }
 
     if (token.empty() || baseUrl.empty()) {
         std::cerr << "Задайте переменные окружения BOT_TOKEN и WEBAPP_URL (см. bot_cpp/README.md)\n";

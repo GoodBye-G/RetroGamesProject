@@ -52,6 +52,13 @@ cmake --build build
 ```
 
 Получится `build/retro_arcade_bot.exe`. Папка `build/` в git не попадает.
+Запускайте его из терминала MSYS2 UCRT64 — там лежат нужные библиотеки (DLL).
+
+Проверить кнопки без токена и без интернета:
+
+```bash
+./build/retro_arcade_bot.exe --dry-run
+```
 
 ## Запуск
 
