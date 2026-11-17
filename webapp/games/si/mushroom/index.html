@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Месть грибов</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <div id="screen">
+        <canvas id="game" width="240" height="208"></canvas>
+
+        <!-- Верхняя панель: жизни, монетки, счёт, уровень, кнопки -->
+        <div id="hud">
+          <span id="hud-lives">♥3</span>
+          <span id="hud-coins">◎0</span>
+          <span id="hud-score">0</span>
+          <span id="hud-level">1</span>
+          <button id="btn-sound" type="button" aria-label="Звук">♪</button>
+          <button id="btn-pause" type="button" aria-label="Пауза">II</button>
+        </div>
+
+        <!-- Экраны поверх игры -->
+        <div id="overlay" class="overlay">
+          <div class="panel">
+            <h1 id="ov-title">МЕСТЬ ГРИБОВ</h1>
+            <p id="ov-text"></p>
+            <div id="ov-buttons"></div>
+          </div>
+        </div>
+
+        <div id="banner" class="banner hidden"></div>
+      </div>
+    </div>
+
+    <!-- Экранные кнопки для телефона -->
+    <div id="pad">
+      <div class="pad-left">
+        <button class="pad-btn" data-key="left" type="button" aria-label="Влево">◀</button>
+        <button class="pad-btn" data-key="right" type="button" aria-label="Вправо">▶</button>
+      </div>
+      <div class="pad-right">
+        <button class="pad-btn pad-jump" data-key="jump" type="button" aria-label="Прыжок">ПРЫЖОК</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="./levels.js"></script>
+  <script src="./game.js"></script>
+</body>
+</html>
