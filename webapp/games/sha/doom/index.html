@@ -3,8 +3,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css">
-<script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+<!-- Эмулятор DOS js-dos: фиксированная версия с jsDelivr (v8.js-dos.com/latest бывает недоступен) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/js-dos@8.3.20/dist/js-dos.css">
+<script src="https://cdn.jsdelivr.net/npm/js-dos@8.3.20/dist/js-dos.js"></script>
 <style>
 html,body{margin:0;height:100%;background:#000;overflow:hidden}
 #dos{position:absolute;inset:0}
@@ -14,7 +15,12 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 <script>
 if (window.Telegram && Telegram.WebApp) Telegram.WebApp.expand();
 Dos(document.getElementById("dos"), {
-  url: "./doom.jsdos",
+  url: "./doom.jsdos.zip",
+  pathPrefix: "https://cdn.jsdelivr.net/npm/js-dos@8.3.20/dist/emulators/",
+  autoStart: true,     // сразу запускать игру, без кнопки «Play»
+  kiosk: true,         // без боковой панели и экрана облачных сохранений js-dos
+  noCloud: true,
+  noNetworking: true,
   onEvent: (e, ci) => { if (e === "ci-ready") initTouch(ci); }
 });
 </script></body></html>
