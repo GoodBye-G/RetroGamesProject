@@ -37,7 +37,13 @@ window.ARCADE_GAMES = [
         path: 'sha/doom/',
         ready: true
       },
-      { id: 'sha-game2', title: 'Игра 2', about: 'В разработке', ready: false }
+      {
+        id: 'sha-candles',
+        title: 'Три свечи',
+        about: 'Карточная игра',
+        path: 'sha/candles/',
+        ready: true
+      }
     ]
   }
 ];
