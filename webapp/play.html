@@ -150,9 +150,16 @@
       frame.title = found.game.title;
       frame.allow = 'autoplay; fullscreen; gamepad';
       frame.src = 'games/' + found.game.path + 'index.html';
-      // Клавиатура сразу управляет игрой, без клика по ней
-      frame.addEventListener('load', function () { try { frame.contentWindow.focus(); } catch (e) {} });
+      // Клавиатура должна попадать в игру, а не в окно аркады вокруг неё
+      function focusGame() { try { frame.focus(); frame.contentWindow.focus(); } catch (e) {} }
+      frame.addEventListener('load', focusGame);
       stage.insertBefore(frame, document.getElementById('turn'));
+      // Фокус остался снаружи (кнопка, меню) — первое же нажатие возвращает его в игру
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Tab') return;
+        focusGame();
+      });
+      window.addEventListener('focus', function () { setTimeout(focusGame, 0); });
 
       // ---------- Назад в меню ----------
       function goMenu() { location.href = './index.html'; }
@@ -203,6 +210,7 @@
           ? 'M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5'
           : 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5');
         setTimeout(layout, 100);
+        focusGame();
       }
 
       function toggleFullscreen() {
@@ -222,7 +230,9 @@
 
       if (useTelegram || useBrowser) {
         fsBtn.hidden = false;
-        fsBtn.addEventListener('click', toggleFullscreen);
+        // Кнопка не забирает фокус у игры
+        fsBtn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+        fsBtn.addEventListener('click', function () { toggleFullscreen(); focusGame(); });
         if (useTelegram) {
           Arcade.call(function () {
             tg.onEvent('fullscreenChanged', updateFsButton);

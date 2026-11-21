@@ -2,6 +2,8 @@ function initTouch(ci) {
   // 1) Касания экрана больше не доходят до игры (иначе любой тап = выстрел)
   const dos = document.getElementById('dos');
   if (dos) dos.style.pointerEvents = 'none';
+  // Клик или тап по игре возвращает ей клавиатуру (на компьютере)
+  document.addEventListener('pointerdown', () => window.focus(), true);
 
   // 2) Запрет выделения текста и контекстного меню при долгом нажатии
   const st = document.createElement('style');
