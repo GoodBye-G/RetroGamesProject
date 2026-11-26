@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="uk"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Сесія: Коледж зв’язку</title>
+<style>
+:root{--bg:#111;--fg:#eee;--mut:#999;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#e9e9ef;--fg:#222;--mut:#555}}
+:root[data-theme="dark"]{--bg:#111;--fg:#eee;--mut:#999}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:system-ui,sans-serif;display:flex;flex-direction:column;align-items:center}
+canvas{background:#222;max-width:100vw;height:auto;border:2px solid #444;touch-action:none}
+p{margin:6px;font-size:12px;color:var(--mut);text-align:center}
+</style></head><body>
+<canvas id="c" width="960" height="540"></canvas>
+<p>WASD/стрілки — рух · Shift — біг · Пробіл/клік — удар · E — взаємодія (утримуй, щоб зв’язати / здати борг) · R — рестарт</p>
+<script>
+const cv=document.getElementById('c'),g=cv.getContext('2d'),W=960,H=540;
+
+// ===== ДАНІ КАРТИ: додавайте / змінюйте кабінети тут =====
+// side: top|bottom, x/w — позиція вздовж коридору, door — x дверей, locked — зачинено назавжди,
+// teacher:{name,color} — викладач, students — к-ть зомбі-студентів у кабінеті, floor — колір підлоги
+// stairs: s = L|R (сторона), d = 1 (вгору) / -1 (вниз). items — аптечки.
+const FLOORS=[
+ {stairs:[{s:'L',d:1}],items:[{x:480,y:270},{x:860,y:400,k:'melon'}],rooms:[
+  {name:"Каб. 101",subject:"Захист України",side:'top',x:0,w:320,door:160,floor:'#8a7f6a',students:2,teacher:{name:"Зіна",color:'#16a085'}},
+  {name:"Каб. 102",side:'top',x:320,w:320,locked:true},
+  {name:"Каб. 103",side:'top',x:640,w:320,locked:true},
+  {name:"Їдальня",side:'bottom',x:0,w:480,door:240,floor:'#7a8a6a',students:3},
+  {name:"Каб. 206 (туалет)",side:'bottom',x:480,w:480,door:720,floor:'#7d7340',toilet:1,students:2}]},
+ {w:2400,scary:true,cz:12,stairs:[{s:'L',d:-1},{s:'R',d:1}],items:[{x:700,y:270},{x:1500,y:270}],rooms:[
+  {name:"Каб. 201",subject:"Комп’ютерні мережі",side:'top',x:150,w:400,door:350,floor:'#6a7f8a',students:1,teacher:{name:"Доц. Кравець",color:'#8e44ad'}},
+  {name:"Каб. 202",subject:"Інформатика",side:'bottom',x:150,w:400,door:350,floor:'#7a8f9a',students:1,bird:1,teacher:{name:"Стас Санич",color:'#7f8c8d',hair:'#fff'}},
+  {name:"Каб. 207",subject:"ОПАМ/ООП",side:'top',x:1350,w:400,door:1550,floor:'#5a7a5a',students:1,mac:1,teacher:{name:"Полновіт",color:'#2e8b57',gold:1,hp:8}},
+  {name:"Каб. 210",subject:"Відвідуваність",side:'bottom',x:1750,w:400,door:1950,floor:'#5a4a4a',students:2,teacher:{name:"Директор",color:'#34495e',hug:1,hp:8,spd:100}},
+  {name:"Каб. 203",side:'top',x:550,w:400,locked:true},{name:"Каб. 205",side:'top',x:950,w:400,locked:true},{name:"Каб. 209",side:'top',x:1750,w:400,locked:true},
+  {name:"Каб. 204",side:'bottom',x:550,w:400,locked:true},{name:"Каб. 206",side:'bottom',x:950,w:400,locked:true},{name:"Каб. 208",side:'bottom',x:1350,w:400,locked:true}]},
+ {stairs:[{s:'R',d:-1}],cz:4,items:[{x:860,y:420,k:'bat'}],zones:[{x:500,y:340,w:180,h:150}],rooms:[
+  {name:"Каб. 301",subject:"Мат. аналіз",side:'top',x:0,w:480,door:240,floor:'#8a6a6a',students:4,teacher:{name:"Проф. Мазур",color:'#c0392b',hp:12,spd:110}},
+  {name:"Каб. 305",subject:"Радіоелектроніка",side:'top',x:480,w:480,door:720,floor:'#6a6a8a',students:4,teacher:{name:"Доц. Волков",color:'#c0392b',hp:12,spd:110}},
+  {name:"Каб. 309",subject:"Цифрова обробка сигналів",side:'bottom',x:0,w:480,door:240,floor:'#6a8a7a',students:5,teacher:{name:"Проф. Ткач",color:'#8e44ad',hp:14,spd:115}},
+  {name:"Каб. 313 (баня і зброя)",side:'bottom',x:480,w:480,door:720,floor:'#9a7a4a',free:1}]}
+];
+// ===== кінець даних карти =====
+
+const dk=document.createElement('canvas');dk.width=W;dk.height=H;const dkc=dk.getContext('2d');
+const keys={};let S,ePress=false;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+addEventListener('keydown',e=>{
+ if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+ if(!keys[e.code]&&e.code==='KeyE')ePress=true;
+ if(e.code==='KeyR')init();
+ if(e.code==='Space'&&!keys.Space)attack();
+ keys[e.code]=1;});
+addEventListener('keyup',e=>keys[e.code]=0);
+cv.addEventListener('mousedown',attack);
+
+function buildFloor(f){
+ const F={def:f,W:f.w||960,walls:[],desks:[],doors:[],zs:[],birds:[],poops:[],blood:[],zones:f.zones||[],items:f.items.map(i=>({...i}))};
+ const Wl=(x,y,w,h)=>F.walls.push({x,y,w,h});
+ Wl(0,0,F.W,15);Wl(0,525,F.W,15);
+ f.rooms.forEach(r=>{
+  const top=r.side==='top',wy=top?220:310;
+  r.door=r.door||r.x+r.w/2;
+  Wl(r.x-3,top?15:310,6,215);Wl(r.x+r.w-3,top?15:310,6,215);
+  Wl(r.x,wy,r.door-25-r.x,10);Wl(r.door+25,wy,r.x+r.w-r.door-25,10);
+  F.doors.push({x:r.door-25,y:wy,w:50,h:10,open:false,locked:!!r.locked,r});
+  if(r.locked)return;
+  for(const yy of(r.free?[]:r.toilet?(top?[25]:[480]):(top?[50,110]:[453,393])))for(let x=r.x+40;x<r.x+r.w-50;x+=80){
+   const d={x,y:yy,w:36,h:22,c:r.toilet?'#e8eef0':0};F.desks.push(d);F.walls.push(d);}
+  if(r.mac){const d={x:r.x+r.w/2-50,y:top?18:496,w:100,h:26,mac:1};F.desks.push(d);F.walls.push(d)}
+  if(r.bird)F.birds.push({x:r.x+298,y:top?108:391,r,top,fl:0,tx:0,ty:0});
+  if(r.toilet)for(let i=0;i<30;i++)F.poops.push({x:rnd(r.x+15,r.x+r.w-15),y:rnd((top?15:320)+10,(top?15:320)+195),r:rnd(7,14)});
+  const ay=top?[150,205]:[335,380];
+  for(let i=0;i<(r.students||0);i++)F.zs.push(mkStudent(rnd(r.x+30,r.x+r.w-30),rnd(...ay)));
+  if(r.teacher){
+   const t={type:'teacher',x:r.x+r.w/2,y:top?175:360,r:15,hp:6,state:'hostile',tie:0,debt:0,t:0,stun:0,cd:0,kx:0,ky:0,room:r,...r.teacher};t.mhp=t.hp;
+   F.zs.push(t);S.teachers.push(t);}
+ });
+ for(let i=0;i<(f.cz||2);i++)F.zs.push(mkStudent(f.scary?150+(F.W-300)*Math.pow(Math.random(),.5):rnd(150,F.W-150),rnd(255,285)));
+ if(f.scary)for(let i=0;i<160;i++)F.blood.push({x:150+(F.W-300)*Math.pow(Math.random(),.5),y:rnd(236,304),r:rnd(3,13)});
+ return F;
+}
+function mkStudent(x,y){return{type:'student',x,y,r:11,hp:2,stun:0,down:0,cd:0,kx:0,ky:0}}
+function init(){
+ S={teachers:[],cur:0,msg:'',mt:0,over:0,t:0};
+ S.p={x:100,y:270,r:11,hp:100,st:100,fx:0,fy:1,cd:0,hurt:0,swing:0};
+ S.fl=FLOORS.map(buildFloor);
+ toast("Ти — єдиний вижилий студент. Закрий сесію!",5);
+}
+function toast(t,s){S.msg=t;S.mt=s||3}
+
+function hitR(e,w){const cx=Math.max(w.x,Math.min(e.x,w.x+w.w)),cy=Math.max(w.y,Math.min(e.y,w.y+w.h));return(e.x-cx)**2+(e.y-cy)**2<e.r*e.r}
+function blocked(e,F){
+ if(e.x<e.r||e.x>F.W-e.r||e.y<e.r||e.y>H-e.r)return 1;
+ for(const w of F.walls)if(hitR(e,w))return 1;
+ for(const d of F.doors)if(!d.open&&hitR(e,d))return 1;
+ return 0}
+function move(e,dx,dy,F){e.x+=dx;if(blocked(e,F))e.x-=dx;e.y+=dy;if(blocked(e,F))e.y-=dy}
+
+function attack(){
+ if(!S||S.over||S.p.held)return;const p=S.p,F=S.fl[S.cur];
+ if(p.cd>0||p.st<10)return;
+ p.cd=.35;p.st-=10;p.swing=.15;
+ for(const z of F.zs){
+  if(z.down||(z.type==='teacher'&&z.state!=='hostile'))continue;
+  const dx=z.x-p.x,dy=z.y-p.y,d=Math.hypot(dx,dy)||1;
+  if(d<(p.range||52)+z.r&&((dx*p.fx+dy*p.fy)/d>.25||d<28)){
+   z.kx=dx/d*260;z.ky=dy/d*260;
+   if(z.type==='student'){z.hp-=p.dmg||1;z.stun=.5;if(z.hp<=0){z.stun=5;z.down=1}}
+   else{z.hp-=p.dmg||1;z.stun=.4;if(z.hp<=0){z.state='stunned';z.t=12;z.tie=0;toast("Викладача оглушено! Утримуй [E], щоб зв’язати",4)}}
+  }}
+}
+
+function getHint(F){
+ const p=S.p;
+ for(const z of F.zs){if(z.type!=='teacher')continue;
+  if(Math.hypot(z.x-p.x,z.y-p.y)<58){
+   if(z.state==='stunned')return{t:"[утримуй E] Зв’язати викладача"};
+   if(z.state==='tied')return{t:"[утримуй E] Здати борг: "+z.room.subject};}}
+ for(const d of F.doors){
+  if(d.open||d.locked)continue;
+  if(Math.hypot(d.x+25-p.x,d.y+5-p.y)<58)return{t:"[E] Увійти в кабінет: "+d.r.name,act:()=>{d.open=true;toast("Двері відчинено")}};}
+ for(const s of F.def.stairs){
+  const sx=s.s==='L'?30:F.W-30;
+  if(Math.hypot(sx-p.x,270-p.y)<60)return{t:"[E] "+(s.d>0?"Піднятись на ":"Спуститись на ")+(S.cur+1+s.d)+" поверх",act:()=>{
+   S.cur+=s.d;p.x=s.s==='L'?80:S.fl[S.cur].W-80;p.y=270;toast("Поверх "+(S.cur+1))}};}
+ return null}
+
+function update(dt){
+ S.t+=dt;if(S.mt>0)S.mt-=dt;
+ if(S.over)return;
+ const p=S.p,F=S.fl[S.cur];
+ let dx=(keys.KeyD||keys.ArrowRight?1:0)-(keys.KeyA||keys.ArrowLeft?1:0),
+     dy=(keys.KeyS||keys.ArrowDown?1:0)-(keys.KeyW||keys.ArrowUp?1:0);
+ if(p.held){const z=p.held;p.x=z.x+4;p.y=z.y+9;dx=dy=0;if(ePress){p.prom+=.1;ePress=false}p.prom=Math.max(0,p.prom-.05*dt);if(p.prom>=1){p.held=null;z.state='stunned';z.t=14;z.tie=0;p.x=z.x+30;toast("Ти пообіцяв ходити очно на пари! Директор розчулений — зв’язуй!",5)}}
+ const l=Math.hypot(dx,dy);let sp=140,run=0;
+ if(F.poops.some(q=>Math.hypot(q.x-p.x,q.y-p.y)<q.r))sp*=.6;
+ if(l){dx/=l;dy/=l;p.fx=dx;p.fy=dy;if(keys.ShiftLeft&&p.st>1){sp=220;run=1;p.st-=28*dt}}
+ if(!run)p.st=Math.min(100,p.st+20*dt);
+ p.cd-=dt;p.hurt-=dt;p.swing-=dt;
+ move(p,dx*sp*dt,dy*sp*dt,F);
+
+ const h=getHint(F);
+ if(ePress&&h&&h.act)h.act();
+ ePress=false;
+
+ for(const it of F.items)if(!it.taken&&Math.hypot(it.x-p.x,it.y-p.y)<20){it.taken=1;
+  if(it.k==='melon'){p.hp=Math.min(100,p.hp+60);toast("Кавун! +60 HP")}
+  else if(it.k==='bat'){p.dmg=2;p.range=68;toast("Взято зброю: бита! Удар ×2 і більший радіус",4)}
+  else{p.hp=Math.min(100,p.hp+40);toast("Аптечка: +40 HP")}}
+ for(const zn of F.zones)if(p.x>zn.x&&p.x<zn.x+zn.w&&p.y>zn.y&&p.y<zn.y+zn.h){p.hp=Math.min(100,p.hp+8*dt);p.st=Math.min(100,p.st+25*dt);if(S.mt<=0)toast("Баня: пар лікує…",2)}
+ for(const b of F.birds){
+  if(!b.fl&&Math.hypot(b.x-p.x,b.y-p.y)<60){b.fl=1;b.tx=rnd(b.r.x+40,b.r.x+b.r.w-40);b.ty=b.top?rnd(160,205):rnd(335,380);toast("Сорока: «Кра-кра!»",2)}
+  if(b.fl){const ex=b.tx-b.x,ey=b.ty-b.y,d=Math.hypot(ex,ey);if(d<5)b.fl=0;else{b.x+=ex/d*170*dt;b.y+=ey/d*170*dt}}}
+
+ for(const z of F.zs){
+  z.kx*=Math.pow(.02,dt);z.ky*=Math.pow(.02,dt);
+  move(z,z.kx*dt,z.ky*dt,F);
+  z.cd-=dt;
+  const dxp=p.x-z.x,dyp=p.y-z.y,d=Math.hypot(dxp,dyp)||1,near=d<58;
+  if(z.type==='teacher'&&z.state!=='hostile'){
+   if(z.state==='stunned'){
+    if(keys.KeyE&&near)z.tie+=dt/2;else z.tie=Math.max(0,z.tie-dt*.4);
+    z.t-=dt;
+    if(z.tie>=1){z.state='tied';z.tie=1;toast("Викладача зв’язано! Підійди й утримуй [E] — здача боргу",4)}
+    else if(z.t<=0){z.state='hostile';z.hp=z.mhp;z.tie=0;toast("Викладач отямився!")}
+   }else if(z.state==='tied'){
+    if(keys.KeyE&&near)z.debt+=dt/3;else z.debt=Math.max(0,z.debt-dt*.15);
+    if(z.debt>=1){z.state='done';toast("Залік отримано: "+z.room.subject+"!",4);
+     if(S.teachers.every(t=>t.state==='done'))S.over=2;}
+   }
+   continue}
+  if(z.stun>0){z.stun-=dt;if(z.stun<=0&&z.down){z.down=0;z.hp=2}continue}
+  const range=z.type==='teacher'?320:230,spd=z.type==='teacher'?(z.spd||85):60;
+  if(p.held===z){z.cd=1;continue}
+  if(d<range)move(z,dxp/d*spd*dt,dyp/d*spd*dt,F);
+  if(z.hug){if(d<z.r+p.r+6){p.held=z;p.prom=0;toast("Директор посадив тебе на коліна! Тисни [E]",5)}continue}
+  if(d<z.r+p.r+3&&z.cd<=0){
+   p.hp-=z.type==='teacher'?14:8;z.cd=1;p.hurt=.3;move(p,dxp/d*14,dyp/d*14,F);
+   if(p.hp<=0){p.hp=0;S.over=1}}
+ }
+ for(let i=0;i<F.zs.length;i++)for(let j=i+1;j<F.zs.length;j++){
+  const a=F.zs[i],b=F.zs[j],ex=b.x-a.x,ey=b.y-a.y,d=Math.hypot(ex,ey);
+  if(d>0&&d<a.r+b.r){const k=(a.r+b.r-d)/2/d;move(a,-ex*k,-ey*k,F);move(b,ex*k,ey*k,F)}}
+}
+
+// ===== малювання =====
+const R=(x,y,w,h,c)=>{g.fillStyle=c;g.fillRect(x,y,w,h)};
+function T(t,x,y,c,sz,al){g.fillStyle=c||'#fff';g.font=(sz||12)+'px system-ui,sans-serif';g.textAlign=al||'center';g.fillText(t,x,y)}
+function bar(x,y,w,h,v,c){R(x,y,w,h,'#000a');R(x,y,w*Math.max(0,Math.min(1,v)),h,c);g.strokeStyle='#fff6';g.strokeRect(x,y,w,h)}
+function circ(x,y,r,c){g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill()}
+
+function drawChar(z,col,label,sub){
+ const down=z.down;
+ g.globalAlpha=down?.5:1;
+ circ(z.x,z.y+(down?4:0),z.r,col);
+ g.strokeStyle='#0008';g.lineWidth=2;g.stroke();g.lineWidth=1;
+ if(z.hair&&!down){g.fillStyle=z.hair;g.beginPath();g.arc(z.x,z.y-1,z.r,Math.PI,0);g.fill()}
+ if(z.gold){g.strokeStyle='#f1c40f';g.lineWidth=2;g.beginPath();g.arc(z.x,z.y,z.r+2,0,7);g.stroke();g.lineWidth=1}
+ if(z.hug)R(z.x-3,z.y+2,6,9,'#c0392b');
+ if(!down){circ(z.x-4,z.y-3,2,'#e33');circ(z.x+4,z.y-3,2,'#e33')}
+ g.globalAlpha=1;
+ T(down?"zzz":label,z.x,z.y-z.r-(sub?15:5),'#fff',z.type==='teacher'?12:10);
+ if(sub)T(sub,z.x,z.y-z.r-4,'#ffd',10);
+}
+
+function draw(){
+ const F=S.fl[S.cur],p=S.p;
+ R(0,0,W,H,'#1b1b24');
+ const cx=Math.max(0,Math.min(F.W-W,p.x-W/2));g.save();g.translate(-cx,0);
+ R(0,230,F.W,80,'#5b5f6b');for(let x=0;x<F.W;x+=40)R(x,230,1,80,'#4e525d');
+ for(const b of F.blood){g.fillStyle='#5c0a0e';g.beginPath();g.ellipse(b.x,b.y,b.r*1.4,b.r,0,0,7);g.fill()}
+ F.def.rooms.forEach(r=>{
+  const top=r.side==='top';
+  R(r.x,top?15:320,r.w,205,r.locked?'#2a2a33':(r.floor||'#4a4a55'));
+  if(!r.locked){
+   T(r.name+(r.subject?" · "+r.subject:""),r.x+r.w/2,top?36:512,'#fff',13);
+  }else T(r.name+" (зачинено)",r.x+r.w/2,top?120:420,'#667',13);
+ });
+ for(const w of F.walls)R(w.x,w.y,w.w,w.h,'#2c2c3d');
+ for(const d of F.desks){R(d.x,d.y,d.w,d.h,d.c||'#6b4f35');if(d.mac){R(d.x+32,d.y+3,36,20,'#c8ccd2');R(d.x+35,d.y+6,30,12,'#222');circ(d.x+50,d.y+12,3,'#fff');T("MacBook",d.x+50,d.y+40,'#fff',9)}else if(!d.c)R(d.x+4,d.y+4,d.w-8,3,'#8a6a48')}
+ for(const d of F.doors){
+  if(d.locked)R(d.x,d.y,d.w,d.h,'#2c2c3d');
+  else if(!d.open)R(d.x,d.y,d.w,d.h,'#a0794a');
+  else{R(d.x,d.y,3,d.h,'#a0794a');R(d.x+d.w-3,d.y,3,d.h,'#a0794a')}}
+ for(const s of F.def.stairs){
+  const sx=s.s==='L'?10:F.W-50;
+  R(sx,240,40,60,'#8b8b95');for(let i=0;i<6;i++)R(sx,244+i*10,40,2,'#55555f');
+  T((s.d>0?"▲ ":"▼ ")+(S.cur+1+s.d),sx+20,236,'#fff',12);}
+ for(const q of F.poops){circ(q.x,q.y,q.r,'#4a2c12');circ(q.x,q.y-2,q.r*.65,'#5d3a1a');circ(q.x,q.y-4,q.r*.35,'#6f4a26')}
+ for(const zn of F.zones){R(zn.x,zn.y,zn.w,zn.h,'#8b5a2b');for(let y=zn.y;y<zn.y+zn.h;y+=14)R(zn.x,y,zn.w,2,'#6b4220');circ(zn.x+zn.w-25,zn.y+25,14,'#555');circ(zn.x+zn.w-25,zn.y+25,8,'#c0392b');
+  g.globalAlpha=.25;for(let i=0;i<6;i++)circ(zn.x+30+i*(zn.w-60)/5,zn.y+zn.h/2+Math.sin(S.t*2+i)*18,16+i*2,'#fff');g.globalAlpha=1;T("БАНЯ",zn.x+zn.w/2,zn.y-4,'#ffd',13)}
+ for(const it of F.items)if(!it.taken){
+  if(it.k==='melon'){circ(it.x,it.y,11,'#2e8b3a');circ(it.x,it.y,6,'#e94b5a');T("Кавун",it.x,it.y-15,'#fff',10)}
+  else if(it.k==='bat'){g.strokeStyle='#c8a165';g.lineWidth=5;g.beginPath();g.moveTo(it.x-10,it.y+8);g.lineTo(it.x+10,it.y-8);g.stroke();g.lineWidth=1;T("Бита",it.x,it.y-15,'#fff',10)}
+  else{R(it.x-9,it.y-9,18,18,'#fff');R(it.x-2,it.y-7,4,14,'#d22');R(it.x-7,it.y-2,14,4,'#d22')}}
+ for(const b of F.birds){circ(b.x,b.y-5,5,'#111');circ(b.x+1,b.y-4,3,'#fff');circ(b.x+4,b.y-7,1.5,'#fff');g.strokeStyle='#123';g.beginPath();g.moveTo(b.x-4,b.y-4);g.lineTo(b.x-12,b.y-(b.fl?8:2));g.stroke();if(b.fl)R(b.x-6,b.y-12+Math.sin(S.t*40)*3,12,2,'#235');T("Сорока",b.x,b.y-14,'#fff',9)}
+ // зони здачі боргу
+ for(const z of F.zs)if(z.type==='teacher'&&z.state==='tied'){
+  g.strokeStyle='#4f4';g.setLineDash([6,6]);g.lineWidth=2;g.beginPath();g.arc(z.x,z.y,50+Math.sin(S.t*4)*3,0,7);g.stroke();g.setLineDash([]);g.lineWidth=1}
+ // персонажі
+ const all=[...F.zs,p].sort((a,b)=>a.y-b.y);
+ for(const e of all){
+  if(e===p){
+   circ(p.x,p.y,p.r,p.hurt>0?'#e74c3c':'#3498db');
+   g.strokeStyle='#fff';g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+p.fx*16,p.y+p.fy*16);g.stroke();
+   T("Ти",p.x,p.y-16,'#fff',11);
+   if(p.dmg>1){g.strokeStyle='#c8a165';g.lineWidth=4;g.beginPath();g.moveTo(p.x,p.y);g.lineTo(p.x+p.fx*26,p.y+p.fy*26);g.stroke();g.lineWidth=1}
+   if(p.swing>0){g.strokeStyle='#fff';g.lineWidth=3;g.beginPath();
+    const a=Math.atan2(p.fy,p.fx);g.arc(p.x,p.y,(p.range||52)-18,a-.8,a+.8);g.stroke();g.lineWidth=1}
+  }else if(e.type==='student')drawChar(e,'#6b8e5a',"Студент");
+  else{
+   const st={hostile:"зомбі-викладач",stunned:"оглушено",tied:"зв’язано",done:"ЗАЛІК ✔"}[e.state];
+   drawChar(e,e.state==='done'?'#2ecc71':e.color,e.name+" · "+st,e.room.subject);
+   if(e.state==='hostile'&&e.hp<6)bar(e.x-18,e.y+e.r+4,36,5,e.hp/e.mhp,'#e74c3c');
+   if(e.state==='stunned')bar(e.x-22,e.y+e.r+4,44,6,e.tie,'#f1c40f');
+   if(e.state==='tied'){
+    g.strokeStyle='#ddd';g.beginPath();g.moveTo(e.x-12,e.y-6);g.lineTo(e.x+12,e.y+6);g.moveTo(e.x+12,e.y-6);g.lineTo(e.x-12,e.y+6);g.stroke();
+    bar(e.x-30,e.y+e.r+4,60,7,e.debt,'#2ecc71');T("Здача боргу",e.x,e.y+e.r+22,'#cfc',10);}
+  }}
+ g.restore();
+ if(F.def.scary){
+  const k=Math.min(1,p.x/F.W),a=.15+.7*k,rad=Math.max(110,300-220*k),px=p.x-cx;
+  dkc.globalCompositeOperation='source-over';dkc.clearRect(0,0,W,H);dkc.fillStyle='rgba(8,0,6,'+a+')';dkc.fillRect(0,0,W,H);
+  dkc.globalCompositeOperation='destination-out';const gr=dkc.createRadialGradient(px,p.y,10,px,p.y,rad);gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(1,'rgba(0,0,0,0)');dkc.fillStyle=gr;dkc.fillRect(0,0,W,H);
+  g.drawImage(dk,0,0);
+  if(k>.5&&Math.sin(S.t*23)*Math.sin(S.t*7)>.85)R(0,0,W,H,'rgba(255,0,0,.08)')}
+ // UI
+ T("HP",10,20,'#fff',11,'left');bar(30,10,150,12,p.hp/100,'#e74c3c');
+ T("STA",10,38,'#fff',11,'left');bar(30,28,150,10,p.st/100,'#f1c40f');
+ R(W/2-50,4,100,24,'#000a');T("Поверх "+(S.cur+1)+" / 3",W/2,21,'#fff',15);
+ const th=24+S.teachers.length*16;
+ R(W-232,4,228,th,'#000b');T("Залікова книжка",W-118,20,'#ffd',13);
+ S.teachers.forEach((t,i)=>{
+  const fi=S.fl.findIndex(f=>f.zs.includes(t))+1;
+  T((t.state==='done'?"✔ ":"✖ ")+t.room.subject+" ("+fi+" пов.)",W-224,36+i*16,t.state==='done'?'#6f6':'#f88',11,'left')});
+ if(S.mt>0){const w=g.measureText(S.msg).width+30;R(W/2-w/2-10,40,w+20,24,'#000a');T(S.msg,W/2,57,'#fff',13)}
+ const h=getHint(F);
+ if(p.held){R(W/2-190,60,380,56,'#000c');T("Директор тримає тебе на колінах! Пообіцяй ходити очно на пари",W/2,78,'#ffd',13);bar(W/2-150,88,300,12,p.prom,'#e91e63');T("швидко тисни [E]",W/2,112,'#fff',11)}
+ if(h&&!S.over&&!p.held){const w=g.measureText(h.t).width+30;R(W/2-w/2-10,486,w+20,24,'#000c');T(h.t,W/2,503,'#ffd',13)}
+ if(S.over){
+  R(0,0,W,H,'#000c');
+  T(S.over===2?"СЕСІЮ ЗАКРИТО! 🎓":"Тебе з’їли…",W/2,H/2-10,S.over===2?'#6f6':'#f55',44);
+  T("Натисни R, щоб почати знову",W/2,H/2+30,'#fff',16)}
+}
+
+let last=performance.now();
+function loop(n){const dt=Math.min(.05,(n-last)/1000);last=n;update(dt);draw();requestAnimationFrame(loop)}
+init();requestAnimationFrame(loop);
+</script></body></html>
