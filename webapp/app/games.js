@@ -4,6 +4,7 @@
     id    — уникальный, латиницей: <инициалы>-<игра>
     path  — папка игры внутри webapp/games/, со слешем в конце; в ней должен быть index.html
     icon  — необязательно: картинка-спрайт для карточки { src, frames } (берётся первый кадр)
+    orientation — необязательно: 'portrait' для вертикальных игр (на телефоне не поворачиваются набок)
 */
 window.ARCADE_GAMES = [
   {
@@ -42,6 +43,7 @@ window.ARCADE_GAMES = [
         title: 'Три свечи',
         about: 'Карточная игра',
         path: 'sha/candles/',
+        orientation: 'portrait',
         ready: true
       }
     ]

@@ -172,11 +172,13 @@
       // альбомное окно. Повернул телефон — картинка встала ровно.
       var isPhone = (navigator.maxTouchPoints > 0 || 'ontouchstart' in window) &&
                     Math.min(screen.width, screen.height) < 600;
+      var portraitGame = found.game.orientation === 'portrait';
       var hintShown = false;
 
       function layout() {
         var w = window.innerWidth, h = window.innerHeight;
-        var rotate = isPhone && h > w;
+        // Вертикальные игры (orientation: 'portrait' в games.js) не поворачиваем
+        var rotate = isPhone && !portraitGame && h > w;
         html.classList.toggle('rotated', rotate);
         stage.style.width = (rotate ? h : w) + 'px';
         stage.style.height = (rotate ? w : h) + 'px';
@@ -222,7 +224,7 @@
           html.requestFullscreen().then(function () {
             // Android Chrome в полном экране умеет закрепить альбомную ориентацию
             if (isPhone && screen.orientation && screen.orientation.lock) {
-              screen.orientation.lock('landscape').catch(function () {});
+              screen.orientation.lock(portraitGame ? 'portrait' : 'landscape').catch(function () {});
             }
           }).catch(function () {});
         }
