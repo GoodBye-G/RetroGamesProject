@@ -31,7 +31,14 @@ window.ARCADE_GAMES = [
         path: 'sv/session/',
         ready: true
       },
-      { id: 'sv-game2', title: 'Игра 2', about: 'В разработке', ready: false }
+      {
+        id: 'sv-revolver',
+        title: 'Last Breath',
+        about: 'Револьверна рулетка: дуель з круп\'є або з друзями',
+        path: 'sv/revolver/',
+        orientation: 'portrait',
+        ready: true
+      }
     ]
   },
   {
