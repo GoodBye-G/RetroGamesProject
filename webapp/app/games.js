@@ -24,7 +24,13 @@ window.ARCADE_GAMES = [
   {
     initials: 'СВ',
     games: [
-      { id: 'sv-game1', title: 'Игра 1', about: 'В разработке', ready: false },
+      {
+        id: 'sv-session',
+        title: 'Сесія',
+        about: 'Зомбі-коледж: здай усі заліки викладачам',
+        path: 'sv/session/',
+        ready: true
+      },
       { id: 'sv-game2', title: 'Игра 2', about: 'В разработке', ready: false }
     ]
   },
