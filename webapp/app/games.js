@@ -18,7 +18,14 @@ window.ARCADE_GAMES = [
         icon: { src: 'games/si/mushroom/assets/player.png', frames: 8 },
         ready: true
       },
-      { id: 'si-game2', title: 'Игра 2', about: 'В разработке', ready: false }
+      {
+        id: 'si-outage',
+        title: 'Графік відключень',
+        about: 'Падаючі блоки в таблиці відключень світла',
+        path: 'si/outage/',
+        orientation: 'portrait',
+        ready: true
+      }
     ]
   },
   {
