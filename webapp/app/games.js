@@ -24,6 +24,7 @@ window.ARCADE_GAMES = [
         about: 'Падаючі блоки в таблиці відключень світла',
         path: 'si/outage/',
         orientation: 'portrait',
+        icon: { src: 'app/icons/si-outage.svg', frames: 1 },
         ready: true
       }
     ]
@@ -36,6 +37,7 @@ window.ARCADE_GAMES = [
         title: 'Сесія',
         about: 'Зомбі-коледж: здай усі заліки викладачам',
         path: 'sv/session/',
+        icon: { src: 'app/icons/sv-session.svg', frames: 1 },
         ready: true
       },
       {
@@ -44,6 +46,7 @@ window.ARCADE_GAMES = [
         about: 'Револьверна рулетка: дуель з круп\'є або з друзями',
         path: 'sv/revolver/',
         orientation: 'portrait',
+        icon: { src: 'app/icons/sv-revolver.svg', frames: 1 },
         ready: true
       }
     ]
@@ -56,6 +59,7 @@ window.ARCADE_GAMES = [
         title: 'DOOM',
         about: 'Легендарный шутер от первого лица',
         path: 'sha/doom/',
+        icon: { src: 'app/icons/sha-doom.svg', frames: 1 },
         ready: true
       },
       {
@@ -64,6 +68,7 @@ window.ARCADE_GAMES = [
         about: 'Карточная игра',
         path: 'sha/candles/',
         orientation: 'portrait',
+        icon: { src: 'app/icons/sha-candles.svg', frames: 1 },
         ready: true
       }
     ]
